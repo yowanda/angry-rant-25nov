@@ -19,12 +19,27 @@ RANT = (
 )
 
 
+def _validate(text: str) -> bytes:
+    """Validate the rant and return its exact UTF-8 bytes.
+
+    Gate rules: 1-400 characters, not whitespace-only, must encode as
+    UTF-8. The bytes are produced here so writing is deterministic and
+    byte-exact on every run.
+    """
+    if not isinstance(text, str) or not 1 <= len(text) <= 400:
+        raise ValueError(f"rant must be 1-400 characters, got {len(text)}")
+    if not text.strip():
+        raise ValueError("rant must not be whitespace-only")
+    return text.encode("utf-8")
+
+
 def main() -> None:
     output_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
     os.makedirs(output_dir, exist_ok=True)
     path = os.path.join(output_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8", newline="\n") as handle:
-        handle.write(RANT)
+    data = _validate(RANT)
+    with open(path, "wb") as handle:
+        handle.write(data)
 
 
 if __name__ == "__main__":
